@@ -355,7 +355,7 @@ Este projeto está sob a licença MIT. Veja o arquivo [LICENSE](LICENSE) para ma
 
 ## 🆘 Suporte
 
-Para suporte, envie um email para vulcanorjbr@gmail.com ou crie uma issue no GitHub.
+Para suporte, crie uma issue no GitHub.
 
 ⭐ **Se este projeto te ajudou, não esqueça de dar uma estrela!**
 
