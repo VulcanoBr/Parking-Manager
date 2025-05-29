@@ -1,0 +1,1 @@
+Chartkick.use(Chart)

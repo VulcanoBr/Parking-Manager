@@ -1,0 +1,64 @@
+<div class="container mt-1">
+  <div class="row">
+    <div class="col-md-8 mx-auto">
+      <div class="card shadow">
+        <div class="card-header bg-primary text-white">
+          <h2 class="mb-0">Gerenciar Vaga <%= @parking_spot.identification %></h2>
+        </div>
+        <div class="card-body">
+          <%= simple_form_for [@parking_lot, @parking_spot] do |f| %>
+            <%= f.error_notification %>
+            
+            <div class="row mb-3">
+              <div class="col-md-12">
+                <p><strong>Tipo:</strong> <%= @parking_spot.spot_type == 'car' ? 'Carro' : 'Motocicleta' %></p>
+              </div>
+            </div>
+            
+            <div class="row mb-3">
+              <div class="col-md-12">
+                <%= f.input :identification, label: "Identificação", input_html: { class: "form-control" } %>
+              </div>
+            </div>
+            
+            <div class="row mb-3">
+              <div class="col-md-12">
+                <%= f.input :status, 
+                      collection: [['Livre', 'free'], ['Ocupada', 'occupied'], ['Bloqueada', 'blocked']], 
+                      label: "Status da Vaga",
+                      include_blank: false,
+                      as: :select,
+                      input_html: { class: "form-select" } %>
+              </div>
+            </div>
+            
+            <div class="form-actions mt-4 d-flex justify-content-between">
+              <%= link_to "Voltar para Vagas", parking_lot_parking_spots_path(@parking_lot), class: "btn btn-outline-secondary" %>
+              <%= f.button :submit, "Atualizar Vaga", class: "btn btn-primary" %>
+            </div>
+          <% end %>
+        </div>
+      </div>
+      
+      <% if @parking_spot.status == 'occupied' && @parking_record.present? %>
+        <div class="card mt-4">
+          <div class="card-header bg-info text-white">
+            <h4 class="mb-0">Veículo Estacionado</h4>
+          </div>
+          <div class="card-body">
+            <div class="row">
+              <div class="col-md-6">
+                <p><strong>Placa:</strong> <%= @parking_record.plate.upcase %></p>
+                <p><strong>Entrada:</strong> <%= @parking_record.entry_time.strftime("%H:%M - %d/%m/%Y") %></p>
+                <p><strong>Tempo decorrido:</strong> <%= time_elapsed(@parking_record.entry_time) %></p>
+              </div>
+              <div class="col-md-6 text-end">
+                <%= link_to "Checkout", checkout_parking_lot_parking_record_path(@parking_lot, @parking_record), class: "btn btn-success btn-lg" %>
+              </div>
+            </div>
+          </div>
+        </div>
+      <% end %>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,296 @@
+<%# app/views/reports/occupancy.html.erb %>
+
+<div class="container-fluid py-4">
+  <div class="row mb-4">
+    <div class="col">
+      <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+          <li class="breadcrumb-item"><%= link_to @parking_lot.name, parking_lot_path(@parking_lot) %></li>
+          <li class="breadcrumb-item"><%= link_to "Relatórios", parking_lot_reports_path(@parking_lot) %></li>
+          <li class="breadcrumb-item active" aria-current="page">Ocupação</li>
+        </ol>
+      </nav>
+      <h1 class="h3 mb-0 text-gray-800">
+        <i class="bi bi-car-front-fill me-2 text-primary"></i>Relatório de Ocupação
+      </h1>
+      <p class="text-muted">Análise da ocupação atual e histórico por hora do dia</p>
+    </div>
+    <div class="col-auto">
+      <%= link_to parking_lot_reports_path(@parking_lot), class: "btn btn-outline-secondary" do %>
+        <i class="bi bi-arrow-left me-1"></i>Voltar para Relatórios
+      <% end %>
+    </div>
+  </div>
+
+  <!-- Resumo Visual -->
+  <div class="row g-4 mb-4">
+    <!-- Estatísticas Gerais -->
+    <div class="col-lg-7">
+      <div class="card border-0 shadow-sm h-100">
+        <div class="card-header bg-white border-0">
+          <h5 class="mb-0">Ocupação Atual</h5>
+        </div>
+        <div class="card-body">
+          <div class="row mb-4">
+            <div class="col-md-6">
+              <div class="text-center mb-3">
+                <h6 class="fw-bold text-uppercase text-muted">Carros</h6>
+                <div class="position-relative d-inline-block">
+                  <div class="progress-circle mx-auto" style="height: 150px; width: 150px;">
+                    <% car_percentage = @parking_lot.car_spots > 0 ? (@car_occupancy.to_f / @parking_lot.car_spots * 100).round : 0 %>
+                    <%= pie_chart({
+                      "Ocupadas" => @car_occupancy,
+                      "Disponíveis" => @parking_lot.car_spots - @car_occupancy
+                    }, legend: false, donut: true, colors: ["#4e73df", "#e3e6f0"], width: "150px", height: "150px") %>
+                  </div>
+                  <div class="position-absolute top-50 start-50 translate-middle text-center">
+                    <h3 class="mb-0 fw-bold"><%= car_percentage %>%</h3>
+                    <p class="mb-0 small">Ocupação</p>
+                  </div>
+                </div>
+                <p class="mt-2">
+                  <span class="fw-semibold"><%= @car_occupancy %> de <%= @parking_lot.car_spots %></span> vagas 
+                </p>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="text-center mb-3">
+                <h6 class="fw-bold text-uppercase text-muted">Motos</h6>
+                <div class="position-relative d-inline-block">
+                  <div class="progress-circle mx-auto" style="height: 150px; width: 150px;">
+                    <% motorcycle_percentage = @parking_lot.motorcycle_spots > 0 ? (@motorcycle_occupancy.to_f / @parking_lot.motorcycle_spots * 100).round : 0 %>
+                    <%= pie_chart({
+                      "Ocupadas" => @motorcycle_occupancy,
+                      "Disponíveis" => @parking_lot.motorcycle_spots - @motorcycle_occupancy
+                    }, legend: false, donut: true, colors: ["#e74a3b", "#e3e6f0"], width: "150px", height: "150px") %>
+                  </div>
+                  <div class="position-absolute top-50 start-50 translate-middle text-center">
+                    <h3 class="mb-0 fw-bold"><%= motorcycle_percentage %>%</h3>
+                    <p class="mb-0 small">Ocupação</p>
+                  </div>
+                </div>
+                <p class="mt-2">
+                  <span class="fw-semibold"><%= @motorcycle_occupancy %> de <%= @parking_lot.motorcycle_spots %></span> vagas 
+              </div>
+            </div>
+          </div>
+          
+          <!-- Comparativo geral -->
+          <div class="mt-4">
+            <h6 class="fw-bold text-uppercase text-muted mb-3">Comparativo de Ocupação Total</h6>
+            <div class="d-flex align-items-center mb-2">
+              <div class="col-3 text-end pe-3">Carros</div>
+              <div class="col">
+                <div class="progress" style="height: 20px;">
+                  <div class="progress-bar bg-primary" role="progressbar" style="width: <%= car_percentage %>%"
+                       aria-valuenow="<%= car_percentage %>" aria-valuemin="0" aria-valuemax="100">
+                    <%= car_percentage %>%
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="d-flex align-items-center">
+              <div class="col-3 text-end pe-3">Motos</div>
+              <div class="col">
+                <div class="progress" style="height: 20px;">
+                  <div class="progress-bar bg-danger" role="progressbar" style="width: <%= motorcycle_percentage %>%"
+                       aria-valuenow="<%= motorcycle_percentage %>" aria-valuemin="0" aria-valuemax="100">
+                    <%= motorcycle_percentage %>%
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Números Atuais -->
+    <div class="col-lg-5">
+      <div class="card border-0 shadow-sm h-100">
+        <div class="card-header bg-white border-0">
+          <h5 class="mb-0">Resumo do Dia</h5>
+        </div>
+        <div class="card-body">
+          <% 
+            total_spots = @parking_lot.car_spots + @parking_lot.motorcycle_spots
+            free_spots = total_spots - ((@car_occupancy + @motorcycle_occupancy) + (@car_blocked + @motorcycle_blocked))
+            free_percentage = total_spots > 0 ? (free_spots.to_f / total_spots * 100).round : 0
+          %>
+          <div class="mb-4">
+            <div class="d-flex align-items-center mb-2">
+              <h6 class="mb-0 me-2">Vagas Disponíveis:</h6>
+              <span class="badge bg-success"><%= free_spots %> vagas (<%= free_percentage %>%)</span>
+            </div>
+            <div class="progress" style="height: 8px;">
+              <div class="progress-bar bg-success" role="progressbar" style="width: <%= free_percentage %>%"
+                   aria-valuenow="<%= free_percentage %>" aria-valuemin="0" aria-valuemax="100"></div>
+            </div>
+          </div>
+
+          <div class="row g-2 mb-4">
+            <div class="col-6">
+              <div class="card bg-light border-0">
+                <div class="card-body p-3">
+                  <div class="d-flex align-items-center">
+                    <div class="flex-shrink-0">
+                      <i class="bi bi-car-front-fill text-primary fs-3"></i>
+                    </div>
+                    <div class="flex-grow-1 ms-3">
+                      <h6 class="fw-bold mb-0">Carros Hoje</h6>
+                      <h4 class="mb-0"><%= @parking_lot.parking_records.today.joins(:parking_spot).where(parking_spots: { spot_type: 'car' }).count %></h4>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="col-6">
+              <div class="card bg-light border-0">
+                <div class="card-body p-3">
+                  <div class="d-flex align-items-center">
+                    <div class="flex-shrink-0">
+                      <i class="bi bi-bicycle text-danger fs-3"></i>
+                    </div>
+                    <div class="flex-grow-1 ms-3">
+                      <h6 class="fw-bold mb-0">Motos Hoje</h6>
+                      <h4 class="mb-0"><%= @parking_lot.parking_records.today.joins(:parking_spot).where(parking_spots: { spot_type: 'motorcycle' }).count %></h4>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="mt-3">
+            <h6 class="fw-bold mb-2">Status do Estacionamento</h6>
+            <div class="table-responsive">
+              <table class="table table-sm">
+                <tbody>
+                  <tr>
+                    <td><i class="bi bi-car-front text-primary me-2"></i>Vagas p/ Carros</td>
+                    <td class="text-end"><%= @parking_lot.car_spots %></td>
+                  </tr>
+                  <tr>
+                    <td><i class="bi bi-car-front-fill text-primary me-2"></i>Carros Estacionados</td>
+                    <td class="text-end"><%= @car_occupancy %></td>
+                  </tr>
+                  <tr>
+                    <td><i class="bi bi-bicycle text-danger me-2"></i>Vagas p/ Motos</td>
+                    <td class="text-end"><%= @parking_lot.motorcycle_spots %></td>
+                  </tr>
+                  <tr>
+                    <td><i class="bi bi-bicycle text-danger me-2"></i>Motos Estacionadas</td>
+                    <td class="text-end"><%= @motorcycle_occupancy %></td>
+                  </tr>
+                  <tr class="table-light">
+                    <td class="fw-bold"><i class="bi bi-percent me-2"></i>Taxa de Ocupação Total</td>
+                    <td class="text-end fw-bold">
+                      <%= total_spots > 0 ? ((@car_occupancy + @motorcycle_occupancy + @motorcycle_blocked).to_f / total_spots * 100).round : 0 %>%
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Gráfico de Ocupação por Hora -->
+  <div class="row">
+    <div class="col-12">
+      <div class="card border-0 shadow-sm">
+        <div class="card-header bg-white border-0 d-flex justify-content-between align-items-center">
+          <h5 class="mb-0">Distribuição de Entradas por Hora</h5>
+          <div class="btn-group btn-group-sm" role="group">
+            <button type="button" class="btn btn-outline-primary active">Hoje</button>
+            <button type="button" class="btn btn-outline-primary">Esta Semana</button>
+            <button type="button" class="btn btn-outline-primary">Este Mês</button>
+          </div>
+        </div>
+        <div class="card-body">
+          <%= column_chart @hourly_data, 
+                          colors: ["#4e73df"], 
+                          height: "300px",
+                          xtitle: "Hora",
+                          ytitle: "Número de Veículos",
+                          library: {
+                            plugins: {
+                              legend: { display: false }
+                            }
+                          } %>
+          <div class="text-center mt-3">
+            <p class="text-muted">Horário com maior movimento: <%= @hourly_data.max_by{|k,v| v}[0].strftime("%H:%M") rescue "N/A" %></p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Lista dos Últimos Registros -->
+  <div class="row mt-4">
+    <div class="col-12">
+      <div class="card border-0 shadow-sm">
+        <div class="card-header bg-white border-0">
+          <h5 class="mb-0">Últimos Registros de Entrada</h5>
+        </div>
+        <div class="card-body p-0">
+          <div class="table-responsive">
+            <table class="table table-hover">
+              <thead class="table-light">
+                <tr>
+                  <th>Placa</th>
+                  <th>Tipo</th>
+                  <th>Vaga</th>
+                  <th>Entrada</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                <% @parking_lot.parking_records.order(entry_time: :desc).limit(5).each do |record| %>
+                  <tr>
+                    <td><%= record.plate.upcase %></td>
+                    <td>
+                      <% if record.parking_spot.spot_type == 'car' %>
+                        <span class="badge bg-primary bg-opacity-10 text-primary">
+                          <i class="bi bi-car-front me-1"></i>Carro
+                        </span>
+                      <% else %>
+                        <span class="badge bg-danger bg-opacity-10 text-danger">
+                          <i class="bi bi-bicycle me-1"></i>Moto
+                        </span>
+                      <% end %>
+                    </td>
+                    <td><%= record.parking_spot.identification %></td>
+                    <td><%= record.entry_time.strftime("%H:%M") %></td>
+                    <td>
+                      <% if record.exit_time.nil? %>
+                        <span class="badge bg-success">Estacionado</span>
+                      <% else %>
+                        <span class="badge bg-secondary">Finalizado</span>
+                      <% end %>
+                    </td>
+                  </tr>
+                <% end %>
+                
+                <% if @parking_lot.parking_records.count == 0 %>
+                  <tr>
+                    <td colspan="5" class="text-center py-4">
+                      <p class="text-muted mb-0">Nenhum registro encontrado</p>
+                    </td>
+                  </tr>
+                <% end %>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <div class="card-footer bg-white text-center">
+          <%= link_to parking_lot_parking_records_path(@parking_lot), class: "text-decoration-none" do %>
+            Ver todos os registros <i class="bi bi-arrow-right ms-1"></i>
+          <% end %>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

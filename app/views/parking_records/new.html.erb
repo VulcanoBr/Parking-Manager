@@ -1,0 +1,122 @@
+<div class="container mt-1">
+  <div class="row">
+    <div class="col-lg-8 mx-auto">
+      <div class="card shadow">
+        <div class="card-header d-flex bg-primary text-white d-flex justify-content-between align-items-center">
+          <h2 class="mb-0">Entrada de Veículo</h2>
+          <div class="">
+            <h3 class="mb-0"><%= @parking_lot.name %></h3>
+          </div>
+        </div>
+        <div class="card-body" data-controller="parking-form" 
+             data-parking-form-parking-lot-id-value="<%= @parking_lot.id %>"
+             data-parking-form-car-spots-count-value="<%= @spots_count[:car] %>"
+             data-parking-form-motorcycle-spots-count-value="<%= @spots_count[:motorcycle] %>">
+          
+          <!-- Informações sobre vagas disponíveis -->
+          <div class="row mb-4">
+            <div class="col-md-6">
+              <div class="alert alert-info d-flex align-items-center">
+                <i class="bi bi-car-front fs-1 me-2"></i>
+                <div>
+                  <strong>Carros:</strong> <%= @spots_count[:car] %> vaga(s) disponível(is)
+                </div>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="alert alert-info d-flex align-items-center">
+                <i class="bi bi-bicycle fs-1 me-2"></i>
+                <div>
+                  <strong>Motos:</strong> <%= @spots_count[:motorcycle] %> vaga(s) disponível(is)
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <%= simple_form_for([@parking_lot, @parking_record], html: { class: 'needs-validation'}) do |f| %>
+            <%= f.error_notification %>
+            
+            <div class="row mb-4">
+              <div class="col-md-6">
+                <%= f.input :vehicle_type, as: :radio_buttons, label: "Tipo de Veículo", 
+                      collection: [['Carro', 'car'], ['Moto', 'motorcycle']],
+                      item_wrapper_class: 'd-inline-block me-5',
+                      input_html: { data: { action: 'change->parking-form#updateSpot' } } %>
+              </div>
+              <div class="col-md-6">
+                <!-- Área para mostrar a vaga selecionada -->
+                <div data-parking-form-target="selectedSpotInfo" class="d-none">
+                  <div class="alert alert-success">
+                    <h6 class="mb-1">Vaga Selecionada:</h6>
+                    <div data-parking-form-target="spotIdentification" class="fw-bold"></div>
+                    <small data-parking-form-target="spotMessage" class="text-muted"></small>
+                  </div>
+                </div>
+                
+                <!-- Área para mostrar quando não há vagas -->
+                <div data-parking-form-target="noSpotsInfo" class="d-none">
+                  <div class="alert alert-warning">
+                    <h6 class="mb-1">Atenção:</h6>
+                    <div data-parking-form-target="noSpotsMessage"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <div class="row mb-4">
+              <div class="col-md-6">
+                <%= f.input :plate, label: "Placa do Veículo", 
+                      input_html: { 
+                        class: "form-control text-uppercase", 
+                        maxlength: 8, 
+                        placeholder: "ABC1234" 
+                      } %>
+              </div>
+              <div class="col-md-6">
+                <%= f.input :entry_time, label: "Horário de Entrada", 
+                            as: :datetime, html5: true, 
+                            disabled: true,
+                            input_html: { class: "form-control", value: Time.current } %>
+              </div>
+            </div>
+
+            <!-- Campo hidden para a vaga selecionada -->
+            <%= f.hidden_field :parking_spot_id, data: { parking_form_target: "parkingSpotId" } %>
+            
+            <div class="form-actions d-flex justify-content-between">
+              <%= link_to "Cancelar", parking_lot_parking_records_path(@parking_lot), class: "btn btn-outline-secondary" %>
+              <%= f.button :submit, "Registrar Entrada", class: "btn btn-primary", 
+                    data: { parking_form_target: "submitBtn" } %>
+            </div>
+          <% end %>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<% content_for :styles do %>
+  <style>
+    .spot-info-card {
+      border: 1px solid #dee2e6;
+      border-radius: 0.375rem;
+      padding: 1rem;
+      background-color: #f8f9fa;
+    }
+    
+    .spot-number {
+      font-size: 1.5rem;
+      font-weight: bold;
+      color: #0d6efd;
+    }
+    
+    .fade-in {
+      animation: fadeIn 0.3s ease-in;
+    }
+    
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+<% end %>

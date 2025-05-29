@@ -1,0 +1,158 @@
+<div class="container mt-1">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h1>Vagas de <%= @parking_lot.name %></h1>
+    <%= link_to "Voltar ao Estacionamento", parking_lot_path(@parking_lot), class: "btn btn-outline-secondary" %>
+  </div>
+
+  <div class="row mb-4">
+    <div class="col-lg-6">
+      <div class="card mb-4">
+        <div class="card-header">
+          <h5 class="mb-0">Vagas para Carros (<%= @parking_lot.car_spots %>)</h5>
+        </div>
+        <div class="card-body">
+          <div class="row">
+            <div class="col-md-4 mb-3">
+              <div class="d-flex align-items-center">
+                <div class="badge bg-success me-2">Livre</div>
+              </div>
+            </div>
+            <div class="col-md-4 mb-3">
+              <div class="d-flex align-items-center">
+                <div class="badge bg-danger me-2">Ocupado</div>
+              </div>
+            </div>
+            <div class="col-md-4 mb-3">
+              <div class="d-flex align-items-center">
+                <div class="badge bg-secondary me-2">Bloqueado</div>
+              </div>
+            </div>
+          </div>
+          
+          <div class="row g-2 mt-2">
+            <% @car_spots.each do |spot| %>
+              <div class="col-2">
+                <%= link_to edit_parking_lot_parking_spot_path(@parking_lot, spot), class: "text-decoration-none" do %>
+                  <div class="card <%= spot_status_color(spot.status) %> spot-card">
+                    <div class="card-body text-center p-2">
+                      <h6 class="mb-0 text-light"><%= spot.identification %></h6>
+                    </div>
+                  </div>
+                <% end %>
+              </div>
+            <% end %>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-lg-6">
+      <div class="card mb-4">
+        <div class="card-header">
+          <h5 class="mb-0">Vagas para Motos (<%= @parking_lot.motorcycle_spots %>)</h5>
+        </div>
+        <div class="card-body">
+          <div class="row">
+            <div class="col-md-4 mb-3">
+              <div class="d-flex align-items-center">
+                <div class="badge bg-success me-2">Livre</div>
+              </div>
+            </div>
+            <div class="col-md-4 mb-3">
+              <div class="d-flex align-items-center">
+                <div class="badge bg-danger me-2">Ocupado</div>
+              </div>
+            </div>
+            <div class="col-md-4 mb-3">
+              <div class="d-flex align-items-center">
+                <div class="badge bg-secondary me-2">Bloqueado</div>
+              </div>
+            </div>
+          </div>
+          
+          <div class="row g-2 mt-2">
+            <% @motorcycle_spots.each do |spot| %>
+              <div class="col-2">
+                <%= link_to edit_parking_lot_parking_spot_path(@parking_lot, spot), class: "text-decoration-none" do %>
+                  <div class="card <%= spot_status_color(spot.status) %> spot-card">
+                    <div class="card-body text-center p-2">
+                      <h6 class="mb-0 text-light"><%= spot.identification %></h6>
+                    </div>
+                  </div>
+                <% end %>
+              </div>
+            <% end %>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-md-6 mb-4">
+      <div class="card">
+        <div class="card-header">
+          <h5 class="mb-0">Resumo das Vagas</h5>
+        </div>
+        <div class="card-body">
+          <div class="table-responsive">
+            <table class="table table-sm">
+              <thead>
+                <tr>
+                  <th>Tipo</th>
+                  <th>Livres</th>
+                  <th>Ocupadas</th>
+                  <th>Bloqueadas</th>
+                  <th>Total</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Carros</td>
+                  <td><%= @free_car_spots_count %></td>
+                  <td><%= @car_spots.where(status: 'occupied').count %></td>
+                  <td><%= @car_spots.where(status: 'blocked').count %></td>
+                  <td><%= @car_spots.count %></td>
+                </tr>
+                <tr>
+                  <td>Motos</td>
+                  <td><%= @motorcycle_spots.where(status: 'free').count %></td>
+                  <td><%= @motorcycle_spots.where(status: 'occupied').count %></td>
+                  <td><%= @motorcycle_spots.where(status: 'blocked').count %></td>
+                  <td><%= @motorcycle_spots.count %></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-6 mb-4">
+      <div class="card">
+        <div class="card-header">
+          <h5 class="mb-0">Taxa de Ocupação</h5>
+        </div>
+        <div class="card-body">
+          <%= pie_chart({"Livre" => @parking_lot.parking_spots.where(status: 'free').count, 
+                         "Ocupada" => @parking_lot.parking_spots.where(status: 'occupied').count,
+                         "Bloqueada" => @parking_lot.parking_spots.where(status: 'blocked').count
+                        }, colors: ["#28a745", "#dc3545", "#6c757d"], donut: true) %>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<% content_for :styles do %>
+  <style>
+    .spot-card {
+      transition: transform 0.2s;
+    }
+    .spot-card:hover {
+      transform: scale(1.05);
+    }
+
+    
+  </style>
+<% end %>

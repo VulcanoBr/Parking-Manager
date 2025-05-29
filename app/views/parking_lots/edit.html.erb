@@ -1,0 +1,18 @@
+<div class="container mt-4">
+  <div class="row">
+    <div class="col-lg-8 mx-auto">
+      <div class="card shadow">
+        <div class="card-header bg-primary text-white">
+          <h2 class="mb-0">Editar Estacionamento</h2>
+        </div>
+        <div class="card-body">
+          <%= render 'form', parking_lot: @parking_lot %>
+        </div>
+        <div class="card-footer bg-white text-center">
+          <%= link_to "Voltar para detalhes", parking_lot_path(@parking_lot), class: "btn btn-outline-secondary me-2" %>
+          <%= button_to "Excluir este estacionamento", parking_lot_path(@parking_lot), method: :delete, data: { confirm: "Tem certeza? Esta ação não pode ser desfeita e excluirá todas as vagas e registros associados." }, class: "btn btn-danger" %>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

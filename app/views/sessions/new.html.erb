@@ -1,0 +1,100 @@
+<!-- app/views/sessions/new.html.erb -->
+<div class="container-fluid  d-flex align-items-center justify-content-center bg-light">
+  <div class="row w-100">
+    <div class="col-md-4 mx-auto">
+      
+      <!-- Logo/Brand Section -->
+      <div class="text-center mb-4">
+        <div class="mb-3">
+          <i class="bi bi-car-front text-primary" style="font-size: 3rem;"></i>
+          <i class="bi bi-bicycle text-primary" style="font-size: 3rem;"></i>
+        </div>
+        <h2 class="text-primary fw-bold">Parking System</h2>
+        <p class="text-muted">Faça login para continuar</p>
+      </div>
+
+      <!-- Login Card -->
+      <div class="card shadow-lg border-0">
+        <div class="card-body p-1">
+          
+          <!-- Login Form -->
+          <%= simple_form_for :session, url: login_path, local: true, html: { class: "needs-validation", novalidate: true } do |f| %>
+            
+            <div class="mb-3">
+              <%= f.input :email, 
+                  label: "Email", 
+                  placeholder: "Digite seu email",
+                  input_html: { 
+                    class: "form-control form-control-lg",
+                    required: true,
+                    autofocus: true,
+                    autocomplete: "email"
+                  },
+                  wrapper_html: { class: "mb-3" } %>
+            </div>
+
+            <div class="mb-5">
+              <%= f.input :password, 
+                  label: "Senha", 
+                  placeholder: "Digite sua senha",
+                  input_html: { 
+                    class: "form-control form-control-lg",
+                    required: true,
+                    autocomplete: "current-password"
+                  },
+                  wrapper_html: { class: "mb-3" } %>
+            </div>
+
+            <div class="d-grid">
+              <%= f.submit "Entrar", class: "btn btn-primary btn-lg fw-bold" %>
+            </div>
+
+          <% end %>
+
+          <!-- Additional Info -->
+          <div class="text-center mt-4 mb-5">
+            <small class="text-muted">
+              <i class="bi bi-shield-lock me-1"></i>
+              Acesso restrito a usuários autorizados
+            </small>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<style>
+  body {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  }
+  
+  .card {
+    border-radius: 15px;
+    backdrop-filter: blur(10px);
+  }
+  
+  .btn-primary {
+    background: linear-gradient(45deg, #667eea, #764ba2);
+    border: none;
+    border-radius: 10px;
+    transition: transform 0.2s ease;
+  }
+  
+  .btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+  }
+  
+  .form-control:focus {
+    border-color: #667eea;
+    box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+  }
+  
+  .alert {
+    border-radius: 10px;
+    border: none;
+  }
+</style>

@@ -1,0 +1,17 @@
+<div id="flash-message" data-controller="alert">
+
+  <% flash.each do |type, message| %>
+    <% 
+      alert_class = case type.to_sym
+                    when :notice then "alert-success"
+                    when :alert, :error then "alert-danger"
+                    when :warning then "alert-warning"
+                    else "alert-info"
+                    end
+    %>
+    <div class="alert <%= alert_class %> alert-dismissible fade show" role="alert" >
+      <%= message %>
+      <button type="button" class="btn-close" data-action="click->alert#dismiss" aria-label="Close"></button>
+    </div>
+  <% end %>
+</div>

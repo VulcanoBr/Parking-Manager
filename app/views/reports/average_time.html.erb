@@ -1,0 +1,233 @@
+<%# app/views/reports/average_time.html.erb %>
+
+<div class="container-fluid py-4">
+  <div class="row mb-4">
+    <div class="col">
+      <h1 class="h3 mb-0 text-gray-800">
+        <i class="bi bi-clock-history me-2 text-info"></i>Tempo Médio - <%= @parking_lot.name %>
+      </h1>
+      <p class="text-muted">Análise do tempo médio de permanência dos veículos no estacionamento</p>
+    </div>
+    <div class="col-auto">
+      <%= link_to parking_lot_reports_path(@parking_lot), class: "btn btn-outline-secondary" do %>
+        <i class="bi bi-arrow-left me-1"></i>Voltar para Relatórios
+      <% end %>
+    </div>
+  </div>
+
+  <% if @records.any? %>
+    <div class="row g-4">
+      <!-- Tempo médio geral -->
+      <div class="col-md-4">
+        <div class="card border-0 shadow-sm h-100">
+          <div class="card-body text-center">
+            <div class="d-inline-flex align-items-center justify-content-center bg-info bg-opacity-10 rounded-circle p-4 mb-3">
+              <i class="bi bi-clock-history text-info fs-1"></i>
+            </div>
+            <h5 class="card-title">Tempo Médio Geral</h5>
+            <% 
+              avg_minutes_total = @records.average("EXTRACT(EPOCH FROM (exit_time - entry_time)) / 60").to_i
+              hours_total = avg_minutes_total / 60
+              minutes_total = avg_minutes_total % 60
+            %>
+            <div class="display-4 mb-3">
+              <%= hours_total > 0 ? "#{hours_total}h #{minutes_total}min" : "#{minutes_total} min" %>
+            </div>
+            <p class="text-muted">Baseado em <%= @records.count %> registros</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tempo médio carros -->
+      <div class="col-md-4">
+        <div class="card border-0 shadow-sm h-100">
+          <div class="card-body text-center">
+            <div class="d-inline-flex align-items-center justify-content-center bg-primary bg-opacity-10 rounded-circle p-4 mb-3">
+              <i class="bi bi-car-front text-primary fs-1"></i>
+            </div>
+            <h5 class="card-title">Carros</h5>
+            <% 
+              avg_minutes_car = @avg_time_car.to_i
+              hours_car = avg_minutes_car / 60
+              minutes_car = avg_minutes_car % 60
+              car_count = @records.joins(:parking_spot).where(parking_spots: { spot_type: 'car' }).count
+            %>
+            <div class="display-4 mb-3">
+              <%= hours_car > 0 ? "#{hours_car}h #{minutes_car}min" : "#{minutes_car} min" %>
+            </div>
+            <p class="text-muted">Baseado em <%= car_count %> registros</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tempo médio motos -->
+      <div class="col-md-4">
+        <div class="card border-0 shadow-sm h-100">
+          <div class="card-body text-center">
+            <div class="d-inline-flex align-items-center justify-content-center bg-success bg-opacity-10 rounded-circle p-4 mb-3">
+              <i class="bi bi-bicycle text-success fs-1"></i>
+            </div>
+            <h5 class="card-title">Motocicletas</h5>
+            <% 
+              avg_minutes_moto = @avg_time_motorcycle.to_i
+              hours_moto = avg_minutes_moto / 60
+              minutes_moto = avg_minutes_moto % 60
+              moto_count = @records.joins(:parking_spot).where(parking_spots: { spot_type: 'motorcycle' }).count
+            %>
+            <div class="display-4 mb-3">
+              <%= hours_moto > 0 ? "#{hours_moto}h #{minutes_moto}min" : "#{minutes_moto} min" %>
+            </div>
+            <p class="text-muted">Baseado em <%= moto_count %> registros</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="row mt-4">
+      <div class="col-12">
+        <div class="card border-0 shadow-sm">
+          <div class="card-header bg-white border-0">
+            <h5 class="mb-0">Tempo Médio por Hora do Dia</h5>
+            <p class="text-muted mb-0">Distribuição do tempo médio de permanência ao longo do dia</p>
+          </div>
+          <div class="card-body">
+            <%= column_chart @hourly_avg_time.transform_keys { |h| "#{h}:00" }.transform_values { |v| (v || 0).to_i }, 
+                suffix: " min", 
+                colors: ["#36b9cc"], 
+                min: 0, 
+                height: "300px", 
+                library: { 
+                  scales: { 
+                    y: { 
+                      title: { display: true, text: 'Tempo médio (minutos)' } 
+                    }, 
+                    x: { 
+                      title: { display: true, text: 'Hora do dia' } 
+                    } 
+                  } 
+                } 
+            %>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="row mt-4">
+      <div class="col-md-6">
+        <div class="card border-0 shadow-sm">
+          <div class="card-header bg-white border-0">
+            <h5 class="mb-0">Comparação entre Tipos de Veículos</h5>
+          </div>
+          <div class="card-body">
+            <%= bar_chart({
+              "Carros" => @avg_time_car.to_i,
+              "Motocicletas" => @avg_time_motorcycle.to_i
+            }, 
+            colors: ["#4e73df", "#1cc88a"], 
+            suffix: " min", 
+            height: "250px") 
+            %>
+          </div>
+        </div>
+      </div>
+      
+      <div class="col-md-6">
+        <div class="card border-0 shadow-sm">
+          <div class="card-header bg-white border-0">
+            <h5 class="mb-0">Tabela de Tempo Médio</h5>
+          </div>
+          <div class="card-body">
+            <div class="table-responsive">
+              <table class="table table-bordered table-hover">
+                <thead class="table-light">
+                  <tr>
+                    <th>Tipo de Veículo</th>
+                    <th class="text-center">Tempo Médio</th>
+                    <th class="text-center">Registros</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>
+                      <i class="bi bi-car-front text-primary me-2"></i>Carros
+                    </td>
+                    <td class="text-center">
+                      <%= hours_car > 0 ? "#{hours_car}h #{minutes_car}min" : "#{minutes_car} min" %>
+                    </td>
+                    <td class="text-center">
+                      <%= car_count %>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <i class="bi bi-bicycle text-success me-2"></i>Motocicletas
+                    </td>
+                    <td class="text-center">
+                      <%= hours_moto > 0 ? "#{hours_moto}h #{minutes_moto}min" : "#{minutes_moto} min" %>
+                    </td>
+                    <td class="text-center">
+                      <%= moto_count %>
+                    </td>
+                  </tr>
+                  <tr class="table-light">
+                    <td>
+                      <strong><i class="bi bi-clock-history text-info me-2"></i>Total</strong>
+                    </td>
+                    <td class="text-center">
+                      <strong><%= hours_total > 0 ? "#{hours_total}h #{minutes_total}min" : "#{minutes_total} min" %></strong>
+                    </td>
+                    <td class="text-center">
+                      <strong><%= @records.count %></strong>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="row mt-4">
+      <div class="col-12">
+        <div class="card border-0 shadow-sm">
+          <div class="card-header bg-white border-0 d-flex justify-content-between align-items-center">
+            <div>
+              <h5 class="mb-0">Faixa de Tempos de Permanência</h5>
+              <p class="text-muted mb-0">Distribuição de registros por intervalo de tempo</p>
+            </div>
+          </div>
+          <div class="card-body">
+            <% 
+              # Definindo as faixas de tempo
+              ranges = {
+                'Menos de 30 min' => @records.where("EXTRACT(EPOCH FROM (exit_time - entry_time)) / 60 < ?", 30).count,
+                '30-60 min' => @records.where("EXTRACT(EPOCH FROM (exit_time - entry_time)) / 60 BETWEEN ? AND ?", 30, 60).count,
+                '1-2 horas' => @records.where("EXTRACT(EPOCH FROM (exit_time - entry_time)) / 60 BETWEEN ? AND ?", 60, 120).count,
+                '2-4 horas' => @records.where("EXTRACT(EPOCH FROM (exit_time - entry_time)) / 60 BETWEEN ? AND ?", 120, 240).count,
+                '4-8 horas' => @records.where("EXTRACT(EPOCH FROM (exit_time - entry_time)) / 60 BETWEEN ? AND ?", 240, 480).count,
+                'Mais de 8 horas' => @records.where("EXTRACT(EPOCH FROM (exit_time - entry_time)) / 60 > ?", 480).count
+              }
+            %>
+            <%= pie_chart ranges, 
+                donut: true, 
+                colors: ["#4e73df", "#1cc88a", "#36b9cc", "#f6c23e", "#e74a3b", "#858796"], 
+                height: "300px" 
+            %>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  <% else %>
+    <div class="alert alert-info shadow-sm">
+      <div class="d-flex align-items-center">
+        <i class="bi bi-info-circle-fill fs-3 me-3"></i>
+        <div>
+          <h5 class="mb-1">Sem dados disponíveis</h5>
+          <p class="mb-0">Não há registros de estacionamento finalizados para gerar este relatório.</p>
+        </div>
+      </div>
+    </div>
+  <% end %>
+</div>

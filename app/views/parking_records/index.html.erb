@@ -1,0 +1,112 @@
+<div class="container-fluid py-1">
+  <div class="row">
+    <div class="col-12">
+      <div class="card shadow-sm">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <h3 class="mb-0"><%= @parking_lot.name  %> - Registros</h3>
+          <div class="row mb-1">
+            <div class="col-md-10">
+              <%= form_with url: parking_lot_parking_records_path(@parking_lot), method: :get, local: true, class: "d-flex" do |form| %>
+                <%= form.text_field :search, 
+                    value: params[:search], 
+                    placeholder: "Buscar por placa...", 
+                    class: "form-control me-2" %>
+                <%= form.submit "Buscar", class: "btn btn-outline-secondary" %>
+                <% if params[:search].present? %>
+                  <%= link_to "Limpar", parking_lot_parking_records_path(@parking_lot), class: "btn btn-outline-danger ms-2" %>
+                <% end %>
+              <% end %>
+            </div>
+          </div>
+          <div>
+            <%= link_to new_parking_lot_parking_record_path(@parking_lot), class: "btn btn-primary" do %>
+              <i class="bi bi-plus-lg"></i> <%= t('.new_record') %>
+            <% end %>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="table-responsive">
+            <table class="table table-hover">
+              <thead>
+                <tr>
+                  
+                  <th><%= ParkingRecord.human_attribute_name(:plate) %></th>
+                  <th><%= ParkingRecord.human_attribute_name(:parking_spot_id) %></th>
+                  <th><%= ParkingRecord.human_attribute_name(:entry_time) %></th>
+                  <th><%= ParkingRecord.human_attribute_name(:exit_time) %></th>
+                  <th><%= ParkingRecord.human_attribute_name(:total_price) %></th>
+                  <th><%= ParkingRecord.human_attribute_name(:payment_status) %></th>
+                  <th><%= t('actions') %></th>
+                </tr>
+              </thead>
+              <tbody>
+                <% @parking_records.each do |record| %>
+                  <tr>
+                    
+                    <td><%= record.plate %></td>
+                    <td><%= record.parking_spot.identification %></td>
+                    <td><%= l(record.entry_time, format: :short) %></td>
+                    <td>
+                      <% if record.exit_time.present? %>
+                        <%= l(record.exit_time, format: :short) %>
+                      <% else %>
+                        <span class="badge bg-success"><%= t('.active') %></span>
+                      <% end %>
+                    </td>
+                    <td>
+                      <% if record.total_price.present? %>
+                        <%= number_to_currency(record.total_price) %>
+                      <% else %>
+                        -
+                      <% end %>
+                    </td>
+                    <td>
+                      <% if record.payment_status == 'paid' %>
+                        <span class="badge bg-success"><%= t("enums.parking_record.payment_status.paid") %></span>
+                      <% else %>
+                        <span class="badge bg-warning text-dark"><%= t("enums.parking_record.payment_status.pending") %></span>
+                      <% end %>
+                    </td>
+                    <td>
+                      <div class="btn-group btn-group-sm">
+                        <%= link_to parking_lot_parking_record_path(@parking_lot, record), class: "btn btn-outline-primary", title: t('visualizar') do %>
+                          <i class="bi bi-eye"></i>
+                        <% end %>
+                        
+                        <% unless record.exit_time.present? %>
+                          <%= link_to checkout_parking_lot_parking_record_path(@parking_lot, record), class: "btn btn-outline-success", title: t('.checkout') do %>
+                            <i class="bi bi-box-arrow-right"></i>
+                          <% end %>
+                        <% end %>
+                        
+                        <% if record.exit_time.present? && record.payment_status == 'pending' %>
+                          <%= link_to payment_parking_lot_parking_record_path(@parking_lot, record), class: "btn btn-outline-warning", title: t('.payment') do %>
+                            <i class="bi bi-credit-card"></i>
+                          <% end %>
+                        <% end %>
+                      </div>
+                    </td>
+                  </tr>
+                <% end %>
+                
+                <% if @parking_records.empty? %>
+                  <tr>
+                    <td colspan="7" class="text-center p-4">
+                      <div class="alert alert-info mb-0">
+                        <%= t('.no_records') %>
+                      </div>
+                    </td>
+                  </tr>
+                <% end %>
+              </tbody>
+            </table>
+          </div>
+          
+          <div class="d-flex justify-content-center mt-4">
+            <%= paginate @parking_records, theme: 'bootstrap-5' %>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

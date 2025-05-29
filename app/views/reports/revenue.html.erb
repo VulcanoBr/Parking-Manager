@@ -1,0 +1,258 @@
+<%# app/views/reports/revenue.html.erb %>
+
+<div class="container-fluid py-4">
+  <!-- Cabeçalho da página -->
+  <div class="row mb-4">
+    <div class="col">
+      <h1 class="h3 mb-0 text-gray-800">
+        <i class="bi bi-currency-dollar me-2 text-success"></i>Relatório de Receita - <%= @parking_lot.name %>
+      </h1>
+      <p class="text-muted">Análise detalhada da receita do estacionamento</p>
+    </div>
+    <div class="col-auto">
+      <%= link_to parking_lot_reports_path(@parking_lot), class: "btn btn-outline-secondary me-2" do %>
+        <i class="bi bi-arrow-left me-1"></i>Voltar para Relatórios
+      <% end %>
+      <button class="btn btn-outline-success" onclick="window.print()">
+        <i class="bi bi-printer me-1"></i>Imprimir
+      </button>
+    </div>
+  </div>
+
+  <!-- Seletor de período -->
+  <div class="row mb-4">
+    <div class="col-md-12">
+      <div class="card border-0 shadow-sm mb-4">
+        <div class="card-body">
+          <%= form_with url: revenue_parking_lot_reports_path(@parking_lot), method: :get, class: "row align-items-center" do |f| %>
+            <div class="col-md-auto">
+              <label class="form-label mb-0"><strong>Período:</strong></label>
+            </div>
+            <div class="col-md-auto">
+              <div class="btn-group" role="group">
+                <%= link_to "Diário", revenue_parking_lot_reports_path(@parking_lot, period: "daily"), 
+                    class: "btn #{@period == 'daily' ? 'btn-success' : 'btn-outline-success'}" %>
+                <%= link_to "Semanal", revenue_parking_lot_reports_path(@parking_lot, period: "weekly"), 
+                    class: "btn #{@period == 'weekly' ? 'btn-success' : 'btn-outline-success'}" %>
+                <%= link_to "Mensal", revenue_parking_lot_reports_path(@parking_lot, period: "monthly"), 
+                    class: "btn #{@period == 'monthly' ? 'btn-success' : 'btn-outline-success'}" %>
+              </div>
+            </div>
+          <% end %>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Resumo de indicadores -->
+  <div class="row g-4 mb-4">
+    <!-- Card de receita total -->
+    <div class="col-md-4">
+      <div class="card border-0 shadow-sm h-100">
+        <div class="card-body">
+          <div class="d-flex align-items-center justify-content-between mb-2">
+            <h6 class="card-subtitle text-muted">Receita Total</h6>
+            <span class="badge bg-success bg-opacity-10 text-success rounded-pill px-3 py-2">
+              <%= @period == 'daily' ? 'Hoje' : (@period == 'weekly' ? 'Últimos 7 dias' : 'Últimos 30 dias') %>
+            </span>
+          </div>
+          <h3 class="display-6 fw-bold text-success mb-0"><%= number_to_currency(@total_revenue) %></h3>
+          <p class="card-text text-muted mt-2">De <%= pluralize(@records.count, 'registro', 'registros') %> concluídos</p>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Card de status de pagamento -->
+    <div class="col-md-4">
+      <div class="card border-0 shadow-sm h-100">
+        <div class="card-body">
+          <h6 class="card-subtitle text-muted mb-3">Status de Pagamento</h6>
+          <div class="d-flex justify-content-around">
+            <div class="text-center">
+              <div class="d-inline-flex justify-content-center align-items-center rounded-circle bg-success bg-opacity-10 mb-2" style="width: 60px; height: 60px;">
+                <i class="bi bi-check-circle-fill text-success fs-4"></i>
+              </div>
+              <h5 class="mb-0"><%= @paid_count %></h5>
+              <p class="text-muted small mb-0">Pagos</p>
+            </div>
+            <div class="text-center">
+              <div class="d-inline-flex justify-content-center align-items-center rounded-circle bg-warning bg-opacity-10 mb-2" style="width: 60px; height: 60px;">
+                <i class="bi bi-clock-fill text-warning fs-4"></i>
+              </div>
+              <h5 class="mb-0"><%= @pending_count %></h5>
+              <p class="text-muted small mb-0">Pendentes</p>
+            </div>
+          </div>
+          <% if @paid_count + @pending_count > 0 %>
+            <div class="progress mt-3" style="height: 8px;">
+              <div class="progress-bar bg-success" role="progressbar" 
+                style="width: <%= (@paid_count.to_f / (@paid_count + @pending_count) * 100).to_i %>%"></div>
+            </div>
+            <div class="small text-muted text-end mt-1">
+              <%= (@paid_count.to_f / (@paid_count + @pending_count) * 100).to_i %>% pagos
+            </div>
+          <% end %>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Card de receita por tipo -->
+    <div class="col-md-4">
+      <div class="card border-0 shadow-sm h-100">
+        <div class="card-body">
+          <h6 class="card-subtitle text-muted mb-3">Receita por Tipo de Veículo</h6>
+          <div class="row align-items-center mb-3">
+            <div class="col-auto">
+              <div class="d-inline-flex justify-content-center align-items-center rounded-circle bg-primary bg-opacity-10" style="width: 48px; height: 48px;">
+                <i class="bi bi-car-front-fill text-primary fs-5"></i>
+              </div>
+            </div>
+            <div class="col">
+              <div class="d-flex justify-content-between align-items-center">
+                <span>Carros</span>
+                <span class="fw-bold"><%= number_to_currency(@car_revenue) %></span>
+              </div>
+              <% if @total_revenue > 0 %>
+                <div class="progress mt-1" style="height: 6px;">
+                  <div class="progress-bar bg-primary" role="progressbar" 
+                    style="width: <%= (@car_revenue.to_f / @total_revenue * 100).to_i %>%"></div>
+                </div>
+              <% end %>
+            </div>
+          </div>
+          <div class="row align-items-center">
+            <div class="col-auto">
+              <div class="d-inline-flex justify-content-center align-items-center rounded-circle bg-info bg-opacity-10" style="width: 48px; height: 48px;">
+                <i class="bi bi-bicycle text-info fs-5"></i>
+              </div>
+            </div>
+            <div class="col">
+              <div class="d-flex justify-content-between align-items-center">
+                <span>Motos</span>
+                <span class="fw-bold"><%= number_to_currency(@motorcycle_revenue) %></span>
+              </div>
+              <% if @total_revenue > 0 %>
+                <div class="progress mt-1" style="height: 6px;">
+                  <div class="progress-bar bg-info" role="progressbar" 
+                    style="width: <%= (@motorcycle_revenue.to_f / @total_revenue * 100).to_i %>%"></div>
+                </div>
+              <% end %>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Gráfico de receita -->
+  <div class="row mb-4">
+    <div class="col-md-12">
+      <div class="card border-0 shadow-sm">
+        <div class="card-header bg-white border-0">
+          <h5 class="mb-0">Receita por <%= @period == 'daily' ? 'Hora' : 'Dia' %></h5>
+        </div>
+        <div class="card-body">
+          <%= line_chart @group_records,
+              colors: ["#198754"],
+              curve: false,
+              points: true,
+              thousands: ".",
+              decimal: ",",
+              prefix: "R$ ",
+              min: 0,
+              library: {
+                plugins: {
+                  tooltip: {
+                    callbacks: {
+                      label: "function(context) { return 'R$ ' + context.parsed.y.toFixed(2).replace('.', ','); }"
+                    }
+                  }
+                }
+              } %>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Tabela de registros -->
+  <div class="row">
+    <div class="col-md-12">
+      <div class="card border-0 shadow-sm">
+        <div class="card-header bg-white border-0 d-flex justify-content-between align-items-center">
+          <h5 class="mb-0">Últimos Registros de Pagamento</h5>
+          <span class="badge bg-success bg-opacity-10 text-success rounded-pill px-3 py-2">
+            Total: <%= @records.count %>
+          </span>
+        </div>
+        <div class="card-body">
+          <div class="table-responsive">
+            <table class="table table-hover">
+              <thead>
+                <tr>
+                  <th scope="col">Placa</th>
+                  <th scope="col">Vaga</th>
+                  <th scope="col">Tipo</th>
+                  <th scope="col">Entrada</th>
+                  <th scope="col">Saída</th>
+                  <th scope="col">Tempo</th>
+                  <th scope="col">Valor</th>
+                  <th scope="col">Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                <% @records.order(exit_time: :desc).limit(10).each do |record| %>
+                  <tr>
+                    <td><strong><%= record.plate.upcase %></strong></td>
+                    <td><%= record.parking_spot.identification %></td>
+                    <td>
+                      <% if record.parking_spot.spot_type == 'car' %>
+                        <span class="badge bg-primary bg-opacity-10 text-primary rounded-pill px-2 py-1">
+                          <i class="bi bi-car-front me-1"></i>Carro
+                        </span>
+                      <% else %>
+                        <span class="badge bg-info bg-opacity-10 text-info rounded-pill px-2 py-1">
+                          <i class="bi bi-bicycle me-1"></i>Moto
+                        </span>
+                      <% end %>
+                    </td>
+                    <td><%= l record.entry_time, format: :short %></td>
+                    <td><%= l record.exit_time, format: :short %></td>
+                    <td>
+                      <% 
+                        minutes = ((record.exit_time - record.entry_time) / 60).to_i
+                        hours = minutes / 60
+                        remaining_mins = minutes % 60
+                      %>
+                      <%= hours > 0 ? "#{hours}h #{remaining_mins}min" : "#{remaining_mins}min" %>
+                    </td>
+                    <td class="fw-bold"><%= number_to_currency(record.total_price) %></td>
+                    <td>
+                      <% if record.payment_status == 'paid' %>
+                        <span class="badge bg-success rounded-pill px-2 py-1">Pago</span>
+                      <% else %>
+                        <span class="badge bg-warning rounded-pill px-2 py-1">Pendente</span>
+                      <% end %>
+                    </td>
+                  </tr>
+                <% end %>
+                <% if @records.count == 0 %>
+                  <tr>
+                    <td colspan="8" class="text-center py-4">
+                      <i class="bi bi-inbox fs-4 d-block mb-2 text-muted"></i>
+                      <p class="text-muted mb-0">Nenhum registro encontrado para o período selecionado.</p>
+                    </td>
+                  </tr>
+                <% end %>
+              </tbody>
+            </table>
+          </div>
+          <% if @records.count > 10 %>
+            <div class="text-center mt-3">
+              <%= link_to "Ver todos os #{@records.count} registros", "#", class: "btn btn-outline-secondary" %>
+            </div>
+          <% end %>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

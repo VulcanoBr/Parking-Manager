@@ -1,0 +1,257 @@
+<div class="row mb-4">
+  <div class="col">
+    <h1>Dashboard</h1>
+  </div>
+</div>
+
+<% if @parking_lots.empty? %>
+  <div class="alert alert-warning">
+    <h4>Nenhum estacionamento cadastrado</h4>
+    <p>Você precisa cadastrar um estacionamento para começar a usar o sistema.</p>
+    <%= link_to "Cadastrar Estacionamento", new_parking_lot_path, class: "btn btn-primary" %>
+  </div>
+<% else %>
+  <!-- Cards de Resumo -->
+  <div class="row g-4 mb-4">
+    <div class="col-md-3">
+      <div class="card text-white bg-primary dashboard-card">
+        <div class="card-body">
+          <h5 class="card-title">Vagas de Carros</h5>
+          <div class="d-flex align-items-center">
+            <div class="flex-grow-1">
+              <h2 class="mb-0"><%= @occupied_car_spots %>/<%= @total_car_spots %></h2>
+              <div> 
+                <span class="text-white-50">Ocupadas</span>
+                  <span class="fw-bold text-white ms-3">
+                  <%= @car_occupancy_percentage %>%
+                </span>
+              </div>
+            </div>
+            <i class="bi bi-car-front fs-1"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+          
+    <div class="col-md-3">
+      <div class="card text-white bg-success dashboard-card">
+        <div class="card-body">
+          <h5 class="card-title">Vagas de Motos</h5>
+          <div class="d-flex align-items-center">
+            <div class="flex-grow-1">
+              <h2 class="mb-0"><%= @occupied_motorcycle_spots %>/<%= @total_motorcycle_spots %></h2>
+              <div>
+                <span class="text-white-50">Ocupadas</span>
+                <span class="fw-bold text-white ms-3">
+                  <%= @motorcycle_occupancy_percentage %>%
+                </span>
+              </div>
+            </div>
+            <i class="bi bi-bicycle fs-1"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    
+    
+    <div class="col-md-3">
+      <div class="card text-white bg-info dashboard-card">
+        <div class="card-body">
+          <h5 class="card-title">Today Movements</h5>
+          <div class="d-flex align-items-center">
+            <div class="flex-grow-1">
+              <h2 class="mb-0"><%= @today_entries %> / <%= @today_exits %></h2>
+              <div class=" align-items-center">
+                <span class="me-2"><%= t('.entries') %>: <%= @today_entries %></span>
+                <span><%= t('.exits') %>: <%= @today_exits %></span>
+              </div>
+            </div>
+            <i class="bi bi-box-arrow-in-down fs-1"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="col-md-3">
+      <div class="card text-white bg-warning dashboard-card">
+        <div class="card-body">
+          <h5 class="card-title">Faturamento Hoje</h5>
+          <div class="d-flex align-items-center">
+            <div class="flex-grow-1">
+              <h2 class="mb-0">R$ <%= number_with_precision(@today_revenue, precision: 2) %></h2>
+              <div class="text-white-50">Total</div>
+            </div>
+            <i class="bi bi-cash-coin fs-1"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+<% end %>
+
+<div class="container-fluid py-4">
+  <!-- Active Records  -->
+  <div class="row">
+    <!-- Active Records Table -->
+    <div class="col-12 col-xl-8 mb-4">
+      <div class="card border-0 shadow-sm">
+        <div class="card-header bg-white">
+          <h5 class="mb-0"><%= t('.veiculos_ativos') %></h5>
+        </div>
+        <div class="card-body p-0">
+          <div class="table-responsive">
+            <table class="table table-hover mb-0">
+              <thead class="bg-light">
+                <tr>
+                  <th><%= ParkingRecord.human_attribute_name(:entry_time) %></th>
+                  <th><%= ParkingRecord.human_attribute_name(:plate) %></th>
+                  <th><%= ParkingRecord.human_attribute_name(:parking_spot_id) %></th>
+                  <th><%= ParkingLot.model_name.human %></th>
+                  <th><%= t('.duration') %></th>
+                  <th><%= t('actions') %></th>
+                </tr>
+              </thead>
+              <tbody>
+                <% if @active_records.any? %>
+                  <% @active_records.each do |record| %>
+                    <tr>
+                      <td><%= l(record.entry_time, format: :short) %></td>
+                      <td class="text-uppercase"><%= record.plate %></td>
+                      <td><%= record.parking_spot.identification %></td>
+                      <td><%= record.parking_lot.name %></td>
+                      <td><%= format_duration(Time.current - record.entry_time) %></td>
+                      <td>
+                        <div class="btn-group btn-group-sm">
+                          <%= link_to parking_lot_parking_record_path(record.parking_lot, record), class: "me-2 btn btn-outline-primary", title: t('show') do %>
+                            <i class="bi bi-eye"></i>
+                          <% end %>
+                          <%= link_to checkout_parking_lot_parking_record_path(record.parking_lot, record), class: "btn btn-outline-success", title: t('.checkout') do %>
+                            <i class="bi bi-box-arrow-right"></i>
+                          <% end %>
+                        </div>
+                      </td>
+                    </tr>
+                  <% end %>
+                <% else %>
+                  <tr>
+                    <td colspan="6" class="text-center p-4">
+                      <div class="alert alert-info mb-0">
+                        <%= t('.no_active_records') %>
+                      </div>
+                    </td>
+                  </tr>
+                <% end %>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+  </div>
+  
+  <!-- Parking Lots Section -->
+  <div class="row mb-4">
+    <div class="col-12">
+      <div class="card border-0 shadow-sm">
+        <div class="card-header bg-white d-flex justify-content-between align-items-center">
+          <h5 class="mb-0"><%= t('.parking_lots') %></h5>
+          <%= link_to new_parking_lot_path, class: "btn btn-sm btn-primary" do %>
+            <i class="bi bi-plus-lg"></i> <%= t('.new_parking_lot') %>
+          <% end %>
+        </div>
+        <div class="card-body p-0">
+          <% if @parking_lots.any? %>
+            <div class="table-responsive">
+              <table class="table table-hover mb-0">
+                <thead class="bg-light">
+                  <tr>
+                    <th><%= ParkingLot.human_attribute_name(:name) %></th>
+                    <th><%= t('.capacity') %></th>
+                    <th><%= t('.occupancy') %></th>
+                    <th><%= ParkingLot.human_attribute_name(:opening_time) %></th>
+                    <th><%= ParkingLot.human_attribute_name(:closing_time) %></th>
+                    <th><%= t('actions') %></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <% @parking_lots.each do |parking_lot| %>
+                    <% lot_data = @parking_lots_data[parking_lot.id] %>
+                    <% occupancy_percentage = lot_data[:occupancy_percentage] %>
+                      <td>
+                        <strong><%= parking_lot.name %></strong>
+                      </td>
+                      <td>
+                        <i class="bi bi-car-front text-primary me-1"></i> <%= parking_lot.car_spots %>
+                        <i class="bi bi-bicycle text-success ms-2 me-1"></i> <%= parking_lot.motorcycle_spots %>
+                      </td>
+                      <td>
+                        <div class="d-flex align-items-center">
+                          <div class="progress flex-grow-1 me-2" style="height: 6px;">
+                            <div class="progress-bar bg-<%= occupancy_percentage > 90 ? 'danger' : (occupancy_percentage > 70 ? 'warning' : 'success') %>" 
+                                role="progressbar" 
+                                style="width: <%= occupancy_percentage %>%" 
+                                aria-valuenow="<%= occupancy_percentage %>" 
+                                aria-valuemin="0" 
+                                aria-valuemax="100"></div>
+                          </div>
+                          <span class="text-<%= occupancy_percentage > 90 ? 'danger' : (occupancy_percentage > 70 ? 'warning' : 'success') %>">
+                            <%= occupancy_percentage %>%
+                          </span>
+                        </div>
+                      </td>
+                      <td><%= l(parking_lot.opening_time, format: :time_only) %></td>
+                      <td><%= l(parking_lot.closing_time, format: :time_only) %></td>
+    
+                      <td>
+                        <div class="btn-group btn-group-sm" role="group" aria-label="Parking Lot Actions">
+                          <%= link_to parking_lot_path(parking_lot), class: "me-2 btn btn-outline-primary", title: 'Visualizar Parking' do %>
+                            <i class="bi bi-eye"></i>
+                          <% end %>
+
+                          <%= link_to parking_lot_parking_spots_path(parking_lot), class: "me-2 btn btn-outline-info", title: 'Vagas Parking' do %>
+                            <i class="bi bi-p-square"></i>
+                          <% end %>
+
+                          <%= link_to parking_lot_parking_records_path(parking_lot), class: "me-2 btn btn-outline-secondary", title: 'Entradas/Saidas' do %>
+                            <i class="bi bi-card-list"></i>
+                          <% end %>
+
+                          <%= link_to new_parking_lot_parking_record_path(parking_lot), class: "me-2 btn btn-outline-success", title: 'New Parking' do %>
+                            <i class="bi bi-plus-circle"></i>
+                          <% end %>
+
+                          <%= link_to edit_parking_lot_path(parking_lot), class: "me-2 btn btn-outline-warning", title: 'Editar Parking' do %>
+                            <i class="bi bi-pencil"></i>
+                          <% end %>
+
+                          <%= link_to parking_lot_reports_path(parking_lot), class: "me-2 btn btn-outline-danger", title: 'Relatorios' do %>
+                            <i class="bi bi-list"></i>
+                          <% end %>
+                        </div>
+                      </td>
+                    </tr>
+                  <% end %>
+                </tbody>
+              </table>
+            </div>
+          <% else %>
+            <div class="text-center p-4">
+              <div class="mb-4">
+                <i class="bi bi-p-square text-primary" style="font-size: 48px;"></i>
+              </div>
+              <h4><%= t('.no_parking_lots_yet') %></h4>
+              <p class="text-muted"><%= t('.create_first_parking_lot') %></p>
+              <%= link_to new_parking_lot_path, class: "btn btn-primary mt-2" do %>
+                <i class="bi bi-plus-lg"></i> <%= t('.new_parking_lot') %>
+              <% end %>
+            </div>
+          <% end %>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

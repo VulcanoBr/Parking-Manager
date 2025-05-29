@@ -1,0 +1,154 @@
+
+
+<div class="container-fluid py-4">
+  <div class="row mb-4">
+    <div class="col">
+      <h1 class="h3 mb-0 text-gray-800">
+        <i class="bi bi-bar-chart-fill me-2"></i>Relatórios - <%= @parking_lot.name %>
+      </h1>
+      <p class="text-muted">Visualize estatísticas e análises do seu estacionamento</p>
+    </div>
+    <div class="col-auto">
+      <%= link_to parking_lot_path(@parking_lot), class: "btn btn-outline-secondary" do %>
+        <i class="bi bi-arrow-left me-1"></i>Voltar
+      <% end %>
+    </div>
+  </div>
+
+  <div class="row g-4">
+    <!-- Card de Ocupação -->
+    <div class="col-md-4">
+      <div class="card h-100 border-0 shadow-sm">
+        <div class="card-body">
+          <div class="d-flex align-items-center mb-3">
+            <div class="feature-icon bg-primary bg-opacity-10 rounded-3 p-3 me-3">
+              <i class="bi bi-car-front-fill text-primary fs-3"></i>
+            </div>
+            <h5 class="card-title mb-0">Ocupação</h5>
+          </div>
+          <p class="card-text">Análise de ocupação de vagas por tipo de veículo e distribuição por hora.</p>
+          <ul class="list-unstyled mb-4">
+            <li><i class="bi bi-check-circle-fill text-success me-2"></i>Taxa de ocupação atual</li>
+            <li><i class="bi bi-check-circle-fill text-success me-2"></i>Distribuição por hora</li>
+            <li><i class="bi bi-check-circle-fill text-success me-2"></i>Comparação entre tipos de veículos</li>
+          </ul>
+          <%= link_to occupancy_parking_lot_reports_path(@parking_lot), class: "btn btn-primary" do %>
+            <i class="bi bi-graph-up me-1"></i>Ver relatório
+          <% end %>
+        </div>
+      </div>
+    </div>
+
+    <!-- Card de Receita -->
+    <div class="col-md-4">
+      <div class="card h-100 border-0 shadow-sm">
+        <div class="card-body">
+          <div class="d-flex align-items-center mb-3">
+            <div class="feature-icon bg-success bg-opacity-10 rounded-3 p-3 me-3">
+              <i class="bi bi-currency-dollar text-success fs-3"></i>
+            </div>
+            <h5 class="card-title mb-0">Receita</h5>
+          </div>
+          <p class="card-text">Análise de receita por período, status de pagamento e tipo de veículo.</p>
+          <ul class="list-unstyled mb-4">
+            <li><i class="bi bi-check-circle-fill text-success me-2"></i>Receita diária, semanal e mensal</li>
+            <li><i class="bi bi-check-circle-fill text-success me-2"></i>Status de pagamentos</li>
+            <li><i class="bi bi-check-circle-fill text-success me-2"></i>Comparação por tipo de veículo</li>
+          </ul>
+          <%= link_to revenue_parking_lot_reports_path(@parking_lot), class: "btn btn-success" do %>
+            <i class="bi bi-cash-stack me-1"></i>Ver relatório
+          <% end %>
+        </div>
+      </div>
+    </div>
+
+    <!-- Card de Tempo Médio -->
+    <div class="col-md-4">
+      <div class="card h-100 border-0 shadow-sm">
+        <div class="card-body">
+          <div class="d-flex align-items-center mb-3">
+            <div class="feature-icon bg-info bg-opacity-10 rounded-3 p-3 me-3">
+              <i class="bi bi-clock-history text-info fs-3"></i>
+            </div>
+            <h5 class="card-title mb-0">Tempo Médio</h5>
+          </div>
+          <p class="card-text">Análise do tempo médio de permanência por tipo de veículo e hora do dia.</p>
+          <ul class="list-unstyled mb-4">
+            <li><i class="bi bi-check-circle-fill text-success me-2"></i>Tempo médio de permanência</li>
+            <li><i class="bi bi-check-circle-fill text-success me-2"></i>Comparação entre carros e motos</li>
+            <li><i class="bi bi-check-circle-fill text-success me-2"></i>Distribuição por hora do dia</li>
+          </ul>
+          <%= link_to average_time_parking_lot_reports_path(@parking_lot), class: "btn btn-info" do %>
+            <i class="bi bi-hourglass-split me-1"></i>Ver relatório
+          <% end %>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row mt-5">
+    <div class="col-md-12">
+      <div class="card border-0 shadow-sm">
+        <div class="card-header bg-white border-0">
+          <h5 class="mb-0">Resumo Rápido</h5>
+        </div>
+        <div class="card-body">
+          <div class="row">
+            <div class="col-md-4">
+              <div class="border-start border-4 border-primary ps-3 mb-3">
+                <h6 class="text-primary mb-1">Vagas Disponíveis</h6>
+                <div class="d-flex align-items-center">
+                  <div class="me-2">
+                    <span class="display-6"><%= @parking_lot.parking_spots.free.count %></span>
+                    <span class="text-muted">de <%= @parking_lot.parking_spots.count %></span>
+                  </div>
+                  <div class="ms-auto">
+                    <div class="progress" style="width: 100px; height: 8px;">
+                      <% occupancy_percentage = @parking_lot.parking_spots.count > 0 ? (@parking_lot.parking_spots.occupied.count.to_f / @parking_lot.parking_spots.count) * 100 : 0 %>
+                      <div class="progress-bar bg-primary" role="progressbar" style="width: <%= occupancy_percentage %>%"></div>
+                    </div>
+                    <small class="text-muted"><%= occupancy_percentage.to_i %>% ocupado</small>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <div class="col-md-4">
+              <div class="border-start border-4 border-success ps-3 mb-3">
+                <h6 class="text-success mb-1">Receita Hoje</h6>
+                <div class="d-flex align-items-center">
+                  <span class="display-6">
+                    <%= number_to_currency(@today_revenue) %>
+                  </span>
+                  
+                  <% if @percentage_change > 0 %>
+                    <span class="ms-2 badge bg-success bg-opacity-10 text-success">
+                      <i class="bi bi-arrow-up-short"></i><%= @percentage_change.to_i %>%
+                    </span>
+                  <% elsif @percentage_change < 0 %>
+                    <span class="ms-2 badge bg-danger bg-opacity-10 text-danger">
+                      <i class="bi bi-arrow-down-short"></i><%= @percentage_change.abs.to_i %>%
+                    </span>
+                  <% else %>
+                    <span class="ms-2 badge bg-secondary bg-opacity-10 text-secondary">
+                      <i class="bi bi-dash"></i>0%
+                    </span>
+                  <% end %>
+                </div>
+              </div>
+            </div>
+            
+            <div class="col-md-4">
+              <div class="border-start border-4 border-info ps-3 mb-3">
+                <h6 class="text-info mb-1">Tempo Médio Hoje</h6>
+                <span class="display-6">
+                  <%= @avg_hours > 0 ? "#{@avg_hours}h #{@avg_minutes}min" : "#{@avg_minutes} min" %>
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

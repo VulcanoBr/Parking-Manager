@@ -1,0 +1,58 @@
+<div class="container-fluid py-1">
+  <div class="row justify-content-center">
+    <div class="col-12 col-lg-8">
+      <div class="card shadow-sm">
+        <div class="card-header">
+          <h3 class="mb-0"><%= t('.title', plate: @parking_record.plate) %></h3>
+        </div>
+        <div class="card-body">
+          <div class="row mb-4">
+            <div class="col-md-6">
+              <dl class="row">
+                <dt class="col-sm-5"><%= ParkingRecord.human_attribute_name(:plate) %></dt>
+                <dd class="col-sm-7"><strong class="text-uppercase"><%= @parking_record.plate %></strong></dd>
+                
+                <dt class="col-sm-5"><%= ParkingRecord.human_attribute_name(:parking_spot_id) %></dt>
+                <dd class="col-sm-7"><%= @parking_record.parking_spot.identification %> 
+                  (<%= t("enums.parking_spot.spot_type.#{@parking_record.parking_spot.spot_type}") %>)
+                </dd>
+                
+                <dt class="col-sm-5"><%= ParkingRecord.human_attribute_name(:entry_time) %></dt>
+                <dd class="col-sm-7"><%= l(@parking_record.entry_time) %></dd>
+              </dl>
+            </div>
+            
+            <div class="col-md-6">
+              <dl class="row">
+                <dt class="col-sm-5"><%= ParkingLot.model_name.human %></dt>
+                <dd class="col-sm-7"><%= @parking_record.parking_lot.name %></dd>
+                
+                <dt class="col-sm-5"><%= t('.current_duration') %></dt>
+                <dd class="col-sm-7"><%= format_duration(Time.current - @parking_record.entry_time) %></dd>
+                
+                <dt class="col-sm-5"><%= t('.estimated_price') %></dt>
+                <dd class="col-sm-7"><strong><%= number_to_currency(@estimated_price) %></strong></dd>
+              </dl>
+            </div>
+          </div>
+          
+          <div class="alert alert-info">
+            <i class="bi bi-info-circle me-2"></i>
+            <%= t('.checkout_info') %>
+          </div>
+          
+          <%= simple_form_for([@parking_lot, @parking_record], url: parking_lot_parking_record_path(@parking_lot, @parking_record), method: :patch) do |f| %>
+            <%= f.input :exit_time, 
+                       as: :hidden, 
+                       input_html: { value: Time.current } %>
+                       
+            <div class="d-flex justify-content-end mt-4">
+              <%= f.button :submit, t('.confirm_checkout'), class: 'btn btn-lg btn-success', data: { confirm: t('.confirm_message') } %>
+              <%= link_to t('cancel'), parking_lot_parking_record_path(@parking_lot, @parking_record), class: 'btn btn-lg btn-outline-secondary ms-2' %>
+            </div>
+          <% end %>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

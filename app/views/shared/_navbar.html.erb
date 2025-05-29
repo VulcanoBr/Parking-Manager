@@ -1,0 +1,161 @@
+<!-- app/views/shared/_navbar.html.erb -->
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow">
+  <div class="container">
+
+    <!-- Brand Section -->
+    <div class="d-flex align-items-center">
+      <i class="text-white bi bi-car-front fs-1 me-2"></i>
+      <i class="text-white bi bi-bicycle fs-1 me-3"></i>
+      <%= link_to "Parking", root_path, class: "navbar-brand fw-bold" %>
+    </div>
+
+    <!-- Mobile Toggle -->
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavMain" aria-controls="navbarNavMain" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <!-- Navbar Content -->
+    <div class="collapse navbar-collapse" id="navbarNavMain">  <%# ID alterado para evitar conflito com outros possíveis navbars %>
+
+      <% if logged_in? %>
+        <!-- Navigation Links (Only if logged in) -->
+        <ul class="navbar-nav me-auto">
+          <% if current_user.admin? %>
+            <li class="nav-item">
+              <%= link_to root_path, class: "nav-link #{current_page?(root_path) ? '' : ''}" do %>
+                <i class="bi bi-speedometer2 me-1"></i>
+                Dashboard
+              <% end %>
+            </li>
+          <% end %>
+
+          <li class="nav-item">
+            <%= link_to parking_lots_path, class: "nav-link #{controller_name == 'parking_lots' ? '' : ''}" do %>
+              <i class="bi bi-p-square me-1"></i>
+              Estacionamentos
+            <% end %>
+          </li>
+
+          
+        </ul>
+
+        <!-- Right Side Content (Only if logged in) -->
+        <div class="d-flex align-items-center">
+
+          <!-- Current Time -->
+          <span class="navbar-text text-white me-4 d-none d-md-block">
+            <i class="bi bi-clock me-1"></i>
+            <span id="current-time">
+              <%= Time.current.strftime("%d/%m/%Y %H:%M") %>
+            </span>
+          </span>
+
+          <!-- User Menu -->
+          <div class="dropdown">
+            <button class="btn btn-outline-light dropdown-toggle d-flex align-items-center"
+                    type="button"
+                    id="userDropdown"
+                    data-bs-toggle="dropdown"
+                    aria-expanded="false">
+              <i class="bi bi-person-circle me-2 fs-5"></i>
+              <span class="d-none d-md-inline">
+                <%# Adicionar um método display_name ao seu modelo User %>
+                <%= current_user.try(:display_name) || current_user.email.split('@').first %>
+              </span>
+              <% if current_user.admin? %>
+                <span class="badge bg-warning text-dark ms-2 d-none d-lg-inline">Admin</span>
+              <% elsif current_user.manager? %> <%# Adicionado elsif para ser mais explícito %>
+                <span class="badge bg-info text-dark ms-2 d-none d-lg-inline">Manager</span>
+              <% end %>
+            </button>
+
+            <ul class="dropdown-menu dropdown-menu-end shadow" aria-labelledby="userDropdown">
+              <li>
+                <h6 class="dropdown-header">
+                  <i class="bi bi-person me-1"></i>
+                  <%= current_user.email %>
+                </h6>
+              </li>
+              <li><hr class="dropdown-divider"></li>
+
+              <li>
+                <span class="dropdown-item-text d-flex justify-content-between align-items-center">
+                  <small class="text-muted">Tipo de usuário:</small>
+                  <% if current_user.admin? %>
+                    <span class="badge bg-warning text-dark">Administrador</span>
+                  <% elsif current_user.manager? %>
+                    <span class="badge bg-info text-dark">Gerente</span>
+                  <% else %>
+                    <span class="badge bg-secondary">Usuário</span> <%# Fallback %>
+                  <% end %>
+                </span>
+              </li>
+
+              <li><hr class="dropdown-divider"></li>
+
+              <li>
+                <%= link_to logout_path,
+                    class: "dropdown-item text-danger d-flex align-items-center",
+                    data: {
+                      turbo_method: :delete,
+                      turbo_confirm: "Tem certeza que deseja sair?"
+                    } do %>
+                  <i class="bi bi-box-arrow-right me-2"></i>
+                  Sair
+                <% end %>
+              </li>
+            </ul>
+          </div>
+        </div>
+      <% else %>
+        <!-- Not Logged In: Show Login Button and Time -->
+        <ul class="navbar-nav ms-auto"> <%# ms-auto para alinhar à direita %>
+            <li class="nav-item d-none d-md-block">
+                 <span class="navbar-text text-white me-3">
+                    <i class="bi bi-clock me-1"></i>
+                    <span id="current-time-public">
+                        <%= Time.current.strftime("%d/%m/%Y %H:%M") %>
+                    </span>
+                 </span>
+            </li>
+            <li class="nav-item">
+                <%= link_to "Login", login_path, class: "btn btn-outline-light" %>
+            </li>
+        </ul>
+      <% end %>
+    </div>
+  </div>
+</nav>
+
+<!-- JavaScript para atualizar o relógio -->
+<script>
+  function updateClock() {
+    const now = new Date();
+    const timeString = now.toLocaleString('pt-BR', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+
+    const clockElement = document.getElementById('current-time');
+    const clockElementPublic = document.getElementById('current-time-public');
+
+    if (clockElement) {
+      clockElement.textContent = timeString.split(', ')[1] || timeString; // Pega só HH:MM ou data completa se não tiver vírgula
+    }
+    if (clockElementPublic) {
+      clockElementPublic.textContent = timeString;
+    }
+  }
+
+  // Atualizar o relógio a cada minuto
+  setInterval(updateClock, 60000);
+
+  // Atualizar imediatamente quando a página carrega
+  document.addEventListener('turbo:load', updateClock); // Use turbo:load se estiver usando Turbo
+  document.addEventListener('DOMContentLoaded', updateClock); // Fallback
+  updateClock(); // Chamada inicial para garantir que mostre a hora certa imediatamente
+</script>
+
