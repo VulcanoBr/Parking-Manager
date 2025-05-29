@@ -59,7 +59,7 @@ class ParkingRecord < ApplicationRecord
 
   def calculate_temp_data(temp_exit_time = Time.current)
     duration_in_seconds = (temp_exit_time - entry_time).to_i
-    temp_total_time = duration_in_seconds  #  Time.at(duration_in_seconds).utc.strftime('%H:%M:%S')
+    temp_total_time = duration_in_seconds
     temp_total_price = parking_lot.calculate_price(vehicle_type, entry_time, temp_exit_time)
 
     {

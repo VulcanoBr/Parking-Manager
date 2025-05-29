@@ -248,7 +248,7 @@
           </div>
           <% if @records.count > 10 %>
             <div class="text-center mt-3">
-              <%= link_to "Ver todos os #{@records.count} registros", "#", class: "btn btn-outline-secondary" %>
+              <%= link_to "Ver todos os #{@records.count} registros", parking_lot_parking_records_path(@parking_lot), class: "btn btn-outline-secondary" %>
             </div>
           <% end %>
         </div>

@@ -21,18 +21,9 @@ module ParkingRecordsHelper
     end
   end
 
-  def format_time_object_as_hours_and_minutes(time_object)
-    return "-hs -min" if time_object.nil? || !time_object.respond_to?(:hour) # Ou como preferir tratar nulos
-
-    hours = time_object.hour
-    minutes = time_object.min
-
-    "#{hours}hs #{minutes}min"
-  end
-
   def format_duration(total_seconds)
     return "N/A" if total_seconds.nil? || total_seconds.to_i < 0 # Lida com nil ou valores negativos
-    puts("total sec = #{total_seconds}")
+
     hours = total_seconds / 3600
     minutes = (total_seconds % 3600) / 60
     seconds = total_seconds % 60
