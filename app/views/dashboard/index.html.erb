@@ -125,10 +125,10 @@
                       <td><%= format_duration(Time.current - record.entry_time) %></td>
                       <td>
                         <div class="btn-group btn-group-sm">
-                          <%= link_to parking_lot_parking_record_path(record.parking_lot, record), class: "me-2 btn btn-outline-primary", title: t('show') do %>
+                          <%= link_to parking_lot_parking_record_path(record.parking_lot, record), class: "me-2 btn btn-outline-primary", title: 'Show' do %>
                             <i class="bi bi-eye"></i>
                           <% end %>
-                          <%= link_to checkout_parking_lot_parking_record_path(record.parking_lot, record), class: "btn btn-outline-success", title: t('.checkout') do %>
+                          <%= link_to checkout_parking_lot_parking_record_path(record.parking_lot, record), class: "btn btn-outline-success", title: 'Checkout' do %>
                             <i class="bi bi-box-arrow-right"></i>
                           <% end %>
                         </div>

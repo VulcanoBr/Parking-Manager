@@ -54,7 +54,21 @@ class ReportsController < ApplicationController
     @motorcycle_blocked = @parking_lot.parking_spots.where(parking_spots: { spot_type: 'motorcycle', status: 'blocked' }).count
 
     # Dados para gráfico por hora
-    @hourly_data = @today_records.group_by_hour(:entry_time).count
+    @period = params[:period] || 'daily'
+    today = Date.current
+
+    case @period
+    when 'daily'
+      records = @parking_lot.parking_records.where(entry_time: today.beginning_of_day..today.end_of_day)
+      @hourly_data = records.group_by_hour(:entry_time).count
+    when 'weekly'
+      records = @parking_lot.parking_records.where("entry_time >= ?", 1.week.ago).completed
+      @hourly_data = records.group_by_hour(:entry_time).count
+    when 'monthly'
+      records = @parking_lot.parking_records.where("entry_time >= ?", 1.month.ago).completed
+      @hourly_data = records.group_by_hour(:entry_time).count
+    end
+
   end
 
   def revenue

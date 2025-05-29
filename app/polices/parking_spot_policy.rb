@@ -1,6 +1,6 @@
 class ParkingSpotPolicy < ApplicationPolicy
   def index?
-    user.admin?
+    user.admin? || user.manager?
   end
 
   def update?
@@ -13,7 +13,7 @@ class ParkingSpotPolicy < ApplicationPolicy
 
   class Scope < Scope
     def resolve
-      if user.admin?
+      if user.admin? || user.manager?
         scope.all
       else
         scope.none

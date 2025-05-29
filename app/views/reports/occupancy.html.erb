@@ -1,6 +1,5 @@
-<%# app/views/reports/occupancy.html.erb %>
 
-<div class="container-fluid py-4">
+<div class="container-fluid py-1">
   <div class="row mb-4">
     <div class="col">
       <nav aria-label="breadcrumb">
@@ -204,9 +203,12 @@
         <div class="card-header bg-white border-0 d-flex justify-content-between align-items-center">
           <h5 class="mb-0">Distribuição de Entradas por Hora</h5>
           <div class="btn-group btn-group-sm" role="group">
-            <button type="button" class="btn btn-outline-primary active">Hoje</button>
-            <button type="button" class="btn btn-outline-primary">Esta Semana</button>
-            <button type="button" class="btn btn-outline-primary">Este Mês</button>
+            <%= link_to "Hoje", occupancy_parking_lot_reports_path(@parking_lot, period: "daily"), 
+                class: "btn #{@period == 'daily' ? 'btn-success' : 'btn-outline-success'}" %>
+            <%= link_to "Esta Semana", occupancy_parking_lot_reports_path(@parking_lot, period: "weekly"), 
+                class: "btn #{@period == 'weekly' ? 'btn-success' : 'btn-outline-success'}" %>
+            <%= link_to "Este Mês", occupancy_parking_lot_reports_path(@parking_lot, period: "monthly"), 
+                class: "btn #{@period == 'monthly' ? 'btn-success' : 'btn-outline-success'}" %>
           </div>
         </div>
         <div class="card-body">
